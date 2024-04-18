@@ -11,13 +11,13 @@ local M = {}
 M.find_synonym = function(opts)
     local word = vim.fn.expand("<cword>")
     local url = "https://api.dictionaryapi.dev/api/v2/entries/en/" .. word
-    log.info("constructed url", url)
+    log.debug("constructed url", url)
     local synonyms = {}
     local job = Job:new({
         command = "curl",
         args = { url },
         on_exit = function(j, return_val)
-            log.info("ret val", return_val)
+            log.debug("ret val", return_val)
             local meanings = vim.json.decode(j:result()[1])[1].meanings
             for _, meaning in pairs(meanings) do
                 for _, v in ipairs(meaning.synonyms) do
@@ -30,7 +30,7 @@ M.find_synonym = function(opts)
     })
     job:start()
     job:wait(2000, 1)
-    log.info("gotten synonyms", vim.json.encode(synonyms))
+    log.debug("gotten synonyms", vim.json.encode(synonyms))
     if next(synonyms) == nil then
         vim.notify("No synonyms for " .. word)
         return
@@ -52,7 +52,7 @@ M.find_synonym = function(opts)
                 actions.select_default:replace(function()
                     local selection = action_state.get_selected_entry()
                     actions.close(prompt_bufnr)
-                    log.info("selection", selection.value)
+                    log.debug("selection", selection.value)
                     vim.lsp.buf.rename(selection.value)
                 end)
                 return true
